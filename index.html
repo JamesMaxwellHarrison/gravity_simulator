@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gravity Model Simulation</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: auto; padding: 1rem; }
+        #controls { margin-bottom: 2rem; }
+        label { margin-right: 1rem; }
+    </style>
+</head>
+<body>
+<h2>Gravity Model Simulation (Anderson & van Wincoop)</h2>
+<div id="controls">
+    <label>Elasticity (σ): <input type="range" min="2" max="10" value="5" id="sigmaSlider"></label>
+    <label>Tau Multiplier: <input type="range" min="0.5" max="2.5" step="0.1" value="1" id="tauMultSlider"></label>
+</div>
+<div id="plot"></div>
+
+<script>
+function computeFlows(Y_i, tau, sigma) {
+    const N = Y_i.length;
+    const Y_w = Y_i.reduce((a, b) => a + b, 0);
+    const share = Y_i.map(y => y / Y_w);
+
+    let Pi = Array(N).fill(1);
+    let P = Array(N).fill(1);
+    let maxIter = 50, tol = 1e-3, epsilon = 1e-9;
+
+    for (let iter = 0; iter < maxIter; iter++) {
+        let P_new = P.slice();
+        let Pi_new = Pi.slice();
+
+        for (let j = 0; j < N; j++) {
+            let sum = 0;
+            for (let i = 0; i < N; i++) {
+                const ratio = tau[i][j] / Math.max(Pi[i], epsilon);
+                sum += share[i] * Math.pow(ratio, 1 - sigma);
+            }
+            P[j] = Math.pow(sum, 1 / (1 - sigma));
+        }
+
+        for (let i = 0; i < N; i++) {
+            let sum = 0;
+            for (let j = 0; j < N; j++) {
+                const ratio = tau[i][j] / Math.max(P[j], epsilon);
+                sum += share[j] * Math.pow(ratio, 1 - sigma);
+            }
+            Pi[i] = Math.pow(sum, 1 / (1 - sigma));
+        }
+
+        const maxDiff = Math.max(...P.map((p, i) => Math.abs(p - P_new[i])));
+        if (maxDiff < tol) break;
+    }
+
+    const flows = Array.from({length: N}, () => Array(N).fill(0));
+    for (let i = 0; i < N; i++) {
+        for (let j = 0; j < N; j++) {
+            const denom = Math.max(Pi[i] * P[j], epsilon);
+            flows[i][j] = (Y_i[i] * Y_i[j] / Y_w) * Math.pow(tau[i][j] / denom, 1 - sigma);
+        }
+    }
+    return { flows, Pi, P };
+}
+
+function drawPlot(sigma = 5, tauMult = 1.0) {
+    const labels = ['o', 'g', 'a', 'b', 'c', 'd'];
+    const Y_i = [30, 30, 20, 20, 25, 25];
+    const N = Y_i.length;
+    const positions = [
+        [2.4, 3.2], [8.0, 3.2],
+        [5.0, 2.0], [5.5, 4.5], [4.5, 4.0], [6.0, 2.5]
+    ];
+
+    const tau = Array.from({length: N}, (_, i) =>
+        Array.from({length: N}, (_, j) =>
+            i === j ? 1 : 1 + tauMult * (Math.hypot(positions[i][0] - positions[j][0], positions[i][1] - positions[j][1])) / 4
+        )
+    );
+
+    const { flows } = computeFlows(Y_i, tau, sigma);
+
+    const nodes = labels.map((l, i) => ({
+        type: 'scatter',
+        mode: 'markers+text',
+        x: [positions[i][0]],
+        y: [positions[i][1]],
+        marker: { size: 10 + Math.sqrt(Y_i[i]) * 2, color: i === 0 ? 'orange' : i === 1 ? 'lightgreen' : 'skyblue' },
+        text: [l],
+        textposition: 'top center',
+        showlegend: false
+    }));
+
+    const arrows = [];
+    for (let i = 0; i < N; i++) {
+        for (let j = 0; j < N; j++) {
+            if (i !== j && flows[i][j] > 0.5) {
+                arrows.push({
+                    type: 'line',
+                    x0: positions[i][0], y0: positions[i][1],
+                    x1: positions[j][0], y1: positions[j][1],
+                    line: {
+                        width: Math.min(3, flows[i][j] / 5),
+                        color: 'gray',
+                        opacity: Math.min(1, flows[i][j] / 300)
+                    }
+                });
+            }
+        }
+    }
+
+    const layout = {
+        title: `Gravity Model (σ=${sigma}, τ multiplier=${tauMult})`,
+        xaxis: { range: [0, 12], visible: false },
+        yaxis: { range: [0, 6.5], visible: false },
+        shapes: arrows,
+        width: 800,
+        height: 500
+    };
+
+    Plotly.newPlot('plot', nodes, layout);
+}
+
+document.getElementById("sigmaSlider").addEventListener("input", e => {
+    drawPlot(parseInt(e.target.value), parseFloat(document.getElementById("tauMultSlider").value));
+});
+
+document.getElementById("tauMultSlider").addEventListener("input", e => {
+    drawPlot(parseInt(document.getElementById("sigmaSlider").value), parseFloat(e.target.value));
+});
+
+drawPlot();
+</script>
+</body>
+</html>
