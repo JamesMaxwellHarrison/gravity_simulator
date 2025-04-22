@@ -7,53 +7,92 @@
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 1000px; margin: auto; padding: 1rem; }
-    #controls { margin-bottom: 2rem; display: flex; flex-wrap: wrap; gap: 1rem; }
+    body { font-family: Arial, sans-serif; margin: auto; padding: 1rem; }
+    #controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      min-width: 280px;
+    }
     label { display: block; font-size: 0.9rem; }
-    .slider-container { display: flex; align-items: center; gap: 0.5rem; }
-    input[type=range] { width: 200px; }
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+    .slider-label {
+      width: 140px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+    input[type=range] { width: 180px; }
     .value-label { width: 40px; text-align: left; }
-    #equationBox { font-size: 1.2rem; margin-bottom: 1em; text-align: center; }
-    #plot { margin-bottom: 2rem; }
-    #table-container { font-family: monospace; white-space: pre; font-size: 1.1em; text-align: center; }
+    #equationBox { font-size: 1.2rem; margin-bottom: 0em; text-align: center; }
+    #plot { margin-bottom: 0rem; }
+    #table-container {
+      font-family: monospace;
+      font-size: 1.25em;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .styled-table {
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 1em;
+      min-width: 300px;
+      text-align: center;
+    }
+    .styled-table th, .styled-table td {
+      border: 1px solid #ccc;
+      padding: 0.4em 0.6em;
+    }
+    .styled-table thead {
+      background-color: #f0f0f0;
+      font-weight: bold;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
   </style>
 </head>
 <body>
 <h2>Gravity Model Simulation (Anderson & van Wincoop)</h2>
-
-<div id="controls">
-  <div>
-    <div class="slider-container"><label>GDP Orange:</label><input type="range" min="10" max="100" value="30" id="Y_orange"><span class="value-label" id="val_Y_orange">30</span></div>
-    <div class="slider-container"><label>GDP Green:</label><input type="range" min="10" max="100" value="30" id="Y_green"><span class="value-label" id="val_Y_green">30</span></div>
-    <div class="slider-container"><label>GDP ROW:</label><input type="range" min="40" max="200" value="90" id="Y_row"><span class="value-label" id="val_Y_row">90</span></div>
-  </div>
-  <div>
-    <div class="slider-container"><label>Orange X:</label><input type="range" min="1" max="10" step="0.1" value="2.4" id="orange_x"><span class="value-label" id="val_orange_x">2.4</span></div>
-    <div class="slider-container"><label>Green X:</label><input type="range" min="1" max="10" step="0.1" value="8.0" id="green_x"><span class="value-label" id="val_green_x">8.0</span></div>
-    <div class="slider-container"><label>ROW X Center:</label><input type="range" min="1" max="10" step="0.1" value="6.0" id="row_x"><span class="value-label" id="val_row_x">6.0</span></div>
-  </div>
-  <div>
-    <div class="slider-container"><label>Sigma (\u03c3):</label><input type="range" min="2" max="10" value="5" id="sigmaSlider"><span class="value-label" id="val_sigmaSlider">5</span></div>
-    <div class="slider-container"><label>Tau Multiplier:</label><input type="range" min="0.5" max="2.5" step="0.1" value="1" id="tauMultSlider"><span class="value-label" id="val_tauMultSlider">1</span></div>
-    <div class="slider-container"><label>Asymmetry:</label><input type="range" min="-1" max="1" step="0.1" value="0" id="asymSlider"><span class="value-label" id="val_asymSlider">0</span></div>
-    <div class="slider-container"><label>Dispersion:</label><input type="range" min="0.0" max="2.5" step="0.1" value="0.5" id="dispersionSlider"><span class="value-label" id="val_dispersionSlider">0.5</span></div>
-  </div>
-  <div>
-    <label>Table View:
+  
+<div style="display: flex; gap: 2rem; align-items: flex-start; width: 100%;">
+  <div id="controls" class="controls-column">
+    <div>
+      <div class="slider-container"><label>X Orange:</label><input type="range" min="1" max="10" step="0.1" value="2.4" id="orange_x"><span class="value-label" id="val_orange_x">2.4</span></div>
+      <div class="slider-container"><label>X Green:</label><input type="range" min="1" max="10" step="0.1" value="8.0" id="green_x"><span class="value-label" id="val_green_x">8.0</span></div>
+      <div class="slider-container"><label>X ROW:</label><input type="range" min="1" max="10" step="0.1" value="6.0" id="row_x"><span class="value-label" id="val_row_x">6.0</span></div>
+    </div>
+    <div>
+      <div class="slider-container"><label>GDP Orange:</label><input type="range" min="10" max="100" value="30" id="Y_orange"><span class="value-label" id="val_Y_orange">30</span></div>
+      <div class="slider-container"><label>GDP Green:</label><input type="range" min="10" max="100" value="30" id="Y_green"><span class="value-label" id="val_Y_green">30</span></div>
+      <div class="slider-container"><label>GDP ROW:</label><input type="range" min="40" max="200" value="120" id="Y_row"><span class="value-label" id="val_Y_row">90</span></div>
+    </div>
+    <div>
+      <div class="slider-container"><label>Tau Multiplier:</label><input type="range" min="0" max="2.5" step="0.1" value="1" id="tauMultSlider"><span class="value-label" id="val_tauMultSlider">1</span></div>
+      <div class="slider-container"><label>Tau Asymmetry:</label><input type="range" min="-1" max="1" step="0.1" value="0" id="asymSlider"><span class="value-label" id="val_asymSlider">0</span></div>
+      <div class="slider-container"><label>Sigma:</label><input type="range" min="2" max="10" value="5" id="sigmaSlider"><span class="value-label" id="val_sigmaSlider">5</span></div>
+      <div class="slider-container"><label>Dispersion:</label><input type="range" min="0.0" max="2" step="0.1" value="1.25" id="dispersionSlider"><span class="value-label" id="val_dispersionSlider">0.5</span></div>
+      <label>Table View:
       <select id="table_type">
         <option value="none">None</option>
-        <option value="flows">Flows</option>
+        <option value="flows" selected>Flows</option>
         <option value="tau">Tau</option>
       </select>
     </label>
+    </div>
   </div>
-</div>
-
-<div id="equationBox">
-\[X_{og} = \\left(\frac{Y_o \\times Y_g}{Y_w}\\right) \\left(\frac{\tau_{og}}{\Pi_o \\times P_g}\\right)^{1-\sigma} = ?\]
-</div>
-<div id="plot"></div>
-<div id="table-container"></div>
+    <div id="table-container"></div>
+    <div id="equationBox">
+    \[X_{og} = \\left(\frac{Y_o \\times Y_g}{Y_w}\\right) \\left(\frac{\tau_{og}}{\Pi_o \\times P_g}\\right)^{1-\sigma} = ?\]
+    </div>
+  </div>
+  
+<div id="plot" style="flex-grow: 1; min-width: 300px;"></div>
+  
 
 <script>
 function mulberry32(a) {
@@ -80,7 +119,7 @@ Array.from(document.querySelectorAll("input[type=range]"))
 function generateRowPositions(centerX, dispersion, seed = 42) {
   const rng = mulberry32(seed);
   const offsets = Array(4).fill(0).map(() => [rng() * 2 - 1, rng() * 2 - 1].map(v => v * dispersion));
-  return offsets.map(offset => [centerX + offset[0], 3.25 + offset[1]]);
+  return offsets.map(offset => [centerX + offset[0], 3.25 + 6 * offset[1]]);  // Increased vertical spread
 }
 
 function computeFlows(Y_i, tau, sigma) {
@@ -129,28 +168,56 @@ function computeFlows(Y_i, tau, sigma) {
 
 function updateEquation(Y_o, Y_g, Y_w, tau_og, Pi_o, P_g, sigma, result) {
   const box = document.getElementById("equationBox");
-  box.innerHTML = `\\[X_{og} = \left(\\frac{${Y_o.toFixed(1)} \\times ${Y_g.toFixed(1)}}{${Y_w.toFixed(1)}}\right) \left(\\frac{${tau_og.toFixed(2)}}{${Pi_o.toFixed(2)} \\times ${P_g.toFixed(2)}}\right)^{${(1 - sigma).toFixed(1)}} = ${result.toFixed(2)}\\]`;
+  box.innerHTML = `\\[X_{og} = \\left(\\frac{${Y_o.toFixed(1)} \\times ${Y_g.toFixed(1)}}{${Y_w.toFixed(1)}}\\right) \\left(\\frac{${tau_og.toFixed(2)}}{${Pi_o.toFixed(2)} \\times ${P_g.toFixed(2)}}\\right)^{${(1 - sigma).toFixed(1)}} = ${result.toFixed(2)}\\]`;
   MathJax.typesetPromise();
 }
 
-function renderTable(data, labels, type) {
+function renderTable(data, labels, type, Pi = [], P = []) {
   const container = document.getElementById("table-container");
-  if (type === "none") return container.innerText = "";
-  const table = [];
-  const n = labels.length;
-  table.push("        " + labels.map(l => l.padStart(6)).join("") + "   Total");
-  for (let i = 0; i < n; i++) {
-    let row = labels[i].padEnd(6);
-    let sum = 0;
-    for (let j = 0; j < n; j++) {
+  if (type === "none") return container.innerHTML = "";
+
+  const N = labels.length;
+  let table = "<table class='styled-table'><thead><tr><th>Origin ↓ / Dest →</th>";
+
+  // Header row
+  for (let l of labels) table += `<th>${l}</th>`;
+  table += `<th>${type === "tau" ? "P (inward MR)" : "Total"}</th></tr></thead><tbody>`;
+
+  // Body rows
+  for (let i = 0; i < N; i++) {
+    let row = `<tr><th>${labels[i]}</th>`;
+    let rowSum = 0;
+    for (let j = 0; j < N; j++) {
       const val = type === 'flows' ? data.flows[i][j] : data.tau[i][j];
-      sum += val;
-      row += val.toFixed(1).padStart(6);
+      rowSum += val;
+      row += `<td>${val.toFixed(2)}</td>`;
     }
-    row += sum.toFixed(1).padStart(8);
-    table.push(row);
+    if (type === "tau") {
+      row += `<td><strong>${P[i].toFixed(2)}</strong></td>`;
+    } else {
+      row += `<td><strong>${rowSum.toFixed(1)}</strong></td>`;
+    }
+    row += "</tr>";
+    table += row;
   }
-  container.innerText = table.join("\n");
+
+  // Bottom row
+  table += `<tr><th>${type === "tau" ? "Π (outward MR)" : "Total"}</th>`;
+  for (let j = 0; j < N; j++) {
+    if (type === "tau") {
+      table += `<td><strong>${Pi[j].toFixed(2)}</strong></td>`;
+    } else {
+      let colSum = 0;
+      for (let i = 0; i < N; i++) {
+        colSum += data.flows[i][j];
+      }
+      table += `<td><strong>${colSum.toFixed(1)}</strong></td>`;
+    }
+  }
+  table += `<td></td></tr>`;  // final empty cell
+  table += "</tbody></table>";
+
+  container.innerHTML = table;
 }
 
 function drawPlot() {
@@ -166,41 +233,51 @@ function drawPlot() {
   const dispersion = parseFloat(document.getElementById("dispersionSlider").value);
   const tableType = document.getElementById("table_type").value;
 
-  const Y_k = Y_row * 0.25, Y_l = Y_row * 0.25, Y_m = Y_row * 0.25, Y_n = Y_row * 0.25;
-  const Y_i = [Y_orange, Y_green, Y_k, Y_l, Y_m, Y_n];
+  const rng = mulberry32(42);  // Use your custom seeded RNG
+  const weights = Array(4).fill(0).map(() => -Math.log(rng()));  // Exponential sampling → Dirichlet
+  const weightSum = weights.reduce((a, b) => a + b, 0);
+  const shares = weights.map(w => w / weightSum);  // normalize to sum to 1
+  const [Y_k, Y_l, Y_m, Y_n] = shares.map(s => s * Y_row);  const Y_i = [Y_orange, Y_green, Y_k, Y_l, Y_m, Y_n];
   const N = Y_i.length;
   const pos_orange = [orange_x, 3.25];
-  const pos_green = [green_x, 3.35];
+  const pos_green = [green_x, 5.25];
   const row_positions = generateRowPositions(row_x, dispersion);
   const positions = [pos_orange, pos_green, ...row_positions];
   const labels = ['o', 'g', 'a', 'b', 'c', 'd'];
 
-  const tau = Array.from({ length: N }, (_, i) =>
-    Array.from({ length: N }, (_, j) => {
-      if (i === j) return 1;
-      const dx = positions[j][0] - positions[i][0];
-      const dy = positions[j][1] - positions[i][1];
-      const d = Math.hypot(dx, dy);
-      const direction = Math.sign(dx);
-      const asym_factor = Math.max(0.5, 1 + asym * direction / 2);
-      return (1 + d * tauMult / 4) * asym_factor;
-    })
-  );
+const tau = Array.from({ length: N }, (_, i) =>
+  Array.from({ length: N }, (_, j) => {
+    if (i === j) return 1;
+    const dx = positions[j][0] - positions[i][0];
+    const dy = positions[j][1] - positions[i][1];
+    const d = Math.hypot(dx, dy);
+
+    let asym_factor = 1;
+    if (asym !== 0) {
+      if ((asym > 0 && dx > 0) || (asym < 0 && dx < 0)) {
+        asym_factor = 1 + Math.abs(asym); // more costly to trade in the biased direction
+      }
+    }
+
+    return 1 + (d * tauMult / 4) * asym_factor;
+  })
+);
 
   const { flows, Pi, P } = computeFlows(Y_i, tau, sigma);
   const gravity_val = (Y_i[0] * Y_i[1]) / (Y_i.reduce((a, b) => a + b)) * Math.pow(tau[0][1] / (Pi[0] * P[1]), 1 - sigma);
 
   updateEquation(Y_i[0], Y_i[1], Y_i.reduce((a, b) => a + b), tau[0][1], Pi[0], P[1], sigma, gravity_val);
-  renderTable({ flows, tau }, labels, tableType);
+  renderTable({ flows, tau }, labels, tableType, Pi, P);
 
   const nodes = labels.map((l, i) => ({
     type: 'scatter',
     mode: 'markers+text',
     x: [positions[i][0]],
     y: [positions[i][1]],
-    marker: { size: (10 + Math.sqrt(Y_i[i]) * 2) * 4, color: i === 0 ? 'orange' : i === 1 ? 'lightgreen' : 'skyblue' },
+    marker: { size: (10 + Math.sqrt(Y_i[i]) * 2) * 3, color: i === 0 ? 'orange' : i === 1 ? 'lightgreen' : 'skyblue' },
     text: [l],
-    textposition: 'top center',
+    textposition: 'above center',  
+    textfont: { size: 18 },
     showlegend: false
   }));
 
@@ -213,23 +290,30 @@ function drawPlot() {
           x0: positions[i][0], y0: positions[i][1],
           x1: positions[j][0], y1: positions[j][1],
           line: {
-            width: Math.min(6, flows[i][j] * 5),
+            width: Math.min(6, flows[i][j] * 2),
             color: 'gray',
-            opacity: Math.min(1, flows[i][j] / 300)
-          }
+          },
+         opacity: Math.min(1, flows[i][j] / 5)
         });
       }
     }
   }
 
   const layout = {
-    title: `Gravity Model (σ=${sigma}, τ=${tauMult}, Asym=${asym})`,
     xaxis: { range: [0, 12], visible: false },
     yaxis: { range: [0, 8.5], visible: false },
     shapes: arrows,
-    width: 1200,
-    height: 700
+    autosize: true,
+    width: Math.min(900, window.innerWidth * 0.65),
+    height: 600
   };
+  
+  const config = {
+    responsive: true,
+    staticPlot: true  // disables zoom, pan, etc.
+  };
+  
+  Plotly.react('plot', nodes, layout, config);
 
   Plotly.newPlot('plot', nodes, layout);
 }
