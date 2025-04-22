@@ -1,4 +1,58 @@
-(function() {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gravity Model Simulation</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: auto;
+      padding: 1rem;
+    }
+    #controls {
+      margin-bottom: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    label {
+      display: block;
+      font-size: 0.9rem;
+    }
+    input[type=range] {
+      width: 200px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Gravity Model Simulation (Anderson & van Wincoop)</h2>
+
+  <div id="controls">
+    <div>
+      <label>GDP Orange: <input type="range" min="10" max="100" value="30" id="Y_orange"></label>
+      <label>GDP Green: <input type="range" min="10" max="100" value="30" id="Y_green"></label>
+      <label>GDP ROW: <input type="range" min="40" max="200" value="90" id="Y_row"></label>
+    </div>
+    <div>
+      <label>Orange X: <input type="range" min="1" max="10" step="0.1" value="2.4" id="orange_x"></label>
+      <label>Green X: <input type="range" min="1" max="10" step="0.1" value="8.0" id="green_x"></label>
+      <label>ROW X Center: <input type="range" min="1" max="10" step="0.1" value="6.0" id="row_x"></label>
+    </div>
+    <div>
+      <label>Sigma (σ): <input type="range" min="2" max="10" value="5" id="sigmaSlider"></label>
+      <label>Tau Multiplier: <input type="range" min="0.5" max="2.5" step="0.1" value="1" id="tauMultSlider"></label>
+      <label>Asymmetry: <input type="range" min="-1" max="1" step="0.1" value="0" id="asymSlider"></label>
+      <label>Dispersion: <input type="range" min="0.0" max="2.5" step="0.1" value="0.5" id="dispersionSlider"></label>
+    </div>
+  </div>
+
+  <div id="equationBox" style="font-family:monospace; font-size:14px; margin-bottom:1em;"></div>
+  <div id="plot"></div>
+
+  <script>
+	(function() {
     const fixedGreenYOffset = 0.1;  // fix green's vertical offset once
     const greenY = 3.25 + fixedGreenYOffset;
 
@@ -87,3 +141,7 @@
 
     drawPlot();
 })();
+
+  </script>
+</body>
+</html>
