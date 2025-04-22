@@ -11,9 +11,9 @@
     #controls { margin-bottom: 2rem; display: flex; flex-wrap: wrap; gap: 1rem; }
     label { display: block; font-size: 0.9rem; }
     input[type=range] { width: 200px; }
-    #equationBox { font-size: 1rem; margin-bottom: 1em; }
+    #equationBox { font-size: 1.2rem; margin-bottom: 1em; text-align: center; }
     #plot { margin-bottom: 2rem; }
-    #table-container { font-family: monospace; white-space: pre; }
+    #table-container { font-family: monospace; white-space: pre; font-size: 1.1em; text-align: center; }
   </style>
 </head>
 <body>
@@ -47,7 +47,9 @@
   </div>
 </div>
 
-<div id="equationBox">\[X_{og} = \left(\frac{Y_o Y_g}{Y_w}\right) \left(\frac{\tau_{og}}{\Pi_o P_g}\right)^{1-\sigma} = ?\]</div>
+<div id="equationBox">
+\[X_{og} = \left(\frac{Y_o \times Y_g}{Y_w}\right) \left(\frac{\tau_{og}}{\Pi_o \times P_g}\right)^{1-\sigma} = ?\]
+</div>
 <div id="plot"></div>
 <div id="table-container"></div>
 
@@ -113,7 +115,7 @@ function computeFlows(Y_i, tau, sigma) {
 
 function updateEquation(Y_o, Y_g, Y_w, tau_og, Pi_o, P_g, sigma, result) {
   const box = document.getElementById("equationBox");
-  box.innerHTML = `\\[X_{og} = \left(\\frac{${Y_o.toFixed(1)} \times ${Y_g.toFixed(1)}}{${Y_w.toFixed(1)}}\right) \left(\\frac{${tau_og.toFixed(2)}}{${Pi_o.toFixed(2)} \times ${P_g.toFixed(2)}}\right)^{${(1 - sigma).toFixed(1)}} = ${result.toFixed(2)}\\]`;
+  box.innerHTML = `\\[X_{og} = \left(\\frac{${Y_o.toFixed(1)} \\times ${Y_g.toFixed(1)}}{${Y_w.toFixed(1)}}\right) \left(\\frac{${tau_og.toFixed(2)}}{${Pi_o.toFixed(2)} \\times ${P_g.toFixed(2)}}\right)^{${(1 - sigma).toFixed(1)}} = ${result.toFixed(2)}\\]`;
   MathJax.typesetPromise();
 }
 
@@ -182,7 +184,7 @@ function drawPlot() {
     mode: 'markers+text',
     x: [positions[i][0]],
     y: [positions[i][1]],
-    marker: { size: 10 + Math.sqrt(Y_i[i]) * 2, color: i === 0 ? 'orange' : i === 1 ? 'lightgreen' : 'skyblue' },
+    marker: { size: (10 + Math.sqrt(Y_i[i]) * 2) * 2, color: i === 0 ? 'orange' : i === 1 ? 'lightgreen' : 'skyblue' },
     text: [l],
     textposition: 'top center',
     showlegend: false
@@ -197,7 +199,7 @@ function drawPlot() {
           x0: positions[i][0], y0: positions[i][1],
           x1: positions[j][0], y1: positions[j][1],
           line: {
-            width: Math.min(3, flows[i][j] / 5),
+            width: Math.min(6, flows[i][j] / 5),
             color: 'gray',
             opacity: Math.min(1, flows[i][j] / 300)
           }
