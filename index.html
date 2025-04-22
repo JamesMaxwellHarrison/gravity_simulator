@@ -63,6 +63,11 @@ function updateSliderValues() {
   });
 }
 
+Array.from(document.querySelectorAll("input[type=range]"))
+  .forEach(el => el.addEventListener("input", updateSliderValues));
+</script>
+<script>
+
 function generateRowPositions(centerX, dispersion, seed = 42) {
   const rng = mulberry32(seed);
   const offsets = Array(4).fill(0).map(() => [rng() * 2 - 1, rng() * 2 - 1].map(v => v * dispersion));
@@ -222,6 +227,7 @@ function drawPlot() {
 
 Array.from(document.querySelectorAll("input, select")).forEach(el => el.addEventListener("input", drawPlot));
 drawPlot();
+updateSliderValues();
 </script>
 </body>
 </html>
