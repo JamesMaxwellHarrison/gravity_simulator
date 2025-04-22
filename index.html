@@ -50,7 +50,7 @@
 </div>
 
 <div id="equationBox">
-\[X_{og} = \left(\frac{Y_o \times Y_g}{Y_w}\right) \left(\frac{\tau_{og}}{\Pi_o \times P_g}\right)^{1-\sigma} = ?\]
+\[X_{og} = \\left(\frac{Y_o \\times Y_g}{Y_w}\\right) \\left(\frac{\tau_{og}}{\Pi_o \\times P_g}\\right)^{1-\sigma} = ?\]
 </div>
 <div id="plot"></div>
 <div id="table-container"></div>
@@ -213,7 +213,7 @@ function drawPlot() {
           x0: positions[i][0], y0: positions[i][1],
           x1: positions[j][0], y1: positions[j][1],
           line: {
-            width: Math.min(6, flows[i][j] / 2),
+            width: Math.min(6, flows[i][j] * 5),
             color: 'gray',
             opacity: Math.min(1, flows[i][j] / 300)
           }
