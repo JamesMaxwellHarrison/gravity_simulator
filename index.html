@@ -14,6 +14,9 @@
       gap: 0.6rem;
       min-width: 280px;
     }
+    #equationBox {
+      display: none;
+    }
     label { display: block; font-size: 0.9rem; }
     .slider-container {
       display: flex;
@@ -82,7 +85,29 @@
         <option value="flows" selected>Flows</option>
         <option value="tau">Tau</option>
       </select>
+      </label>
+      <label>Exporter:
+      <select id="exporterSelect">
+        <option value="none">None</option>
+        <option value="0">o</option>
+        <option value="1">g</option>
+        <option value="2">a</option>
+        <option value="3">b</option>
+        <option value="4">c</option>
+        <option value="5">d</option>
+      </select>
     </label>
+    <label>Importer:
+      <select id="importerSelect">
+        <option value="none">None</option>
+        <option value="0">o</option>
+        <option value="1">g</option>
+        <option value="2">a</option>
+        <option value="3">b</option>
+        <option value="4">c</option>
+        <option value="5">d</option>
+      </select>
+    </label>      
     </div>
   </div>
     <div id="table-container"></div>
@@ -166,11 +191,12 @@ function computeFlows(Y_i, tau, sigma) {
   return { flows, Pi, P };
 }
 
-function updateEquation(Y_o, Y_g, Y_w, tau_og, Pi_o, P_g, sigma, result) {
+function updateEquation(Y_o, Y_g, Y_w, tau_og, Pi_o, P_g, sigma, result, label_o, label_g) {
   const box = document.getElementById("equationBox");
-  box.innerHTML = `\\[X_{og} = \\left(\\frac{${Y_o.toFixed(1)} \\times ${Y_g.toFixed(1)}}{${Y_w.toFixed(1)}}\\right) \\left(\\frac{${tau_og.toFixed(2)}}{${Pi_o.toFixed(2)} \\times ${P_g.toFixed(2)}}\\right)^{${(1 - sigma).toFixed(1)}} = ${result.toFixed(2)}\\]`;
+  box.innerHTML = `\\[X_{${label_o}${label_g}} = \\left(\\frac{${Y_o.toFixed(1)} \\times ${Y_g.toFixed(1)}}{${Y_w.toFixed(1)}}\\right) \\left(\\frac{${Pi_o.toFixed(2)} \\times ${P_g.toFixed(2)}}{${tau_og.toFixed(2)}}\\right)^{${(sigma-1).toFixed(1)}} = ${result.toFixed(2)}\\]`;
   MathJax.typesetPromise();
 }
+
 
 function renderTable(data, labels, type, Pi = [], P = []) {
   const container = document.getElementById("table-container");
@@ -264,9 +290,31 @@ const tau = Array.from({ length: N }, (_, i) =>
 );
 
   const { flows, Pi, P } = computeFlows(Y_i, tau, sigma);
-  const gravity_val = (Y_i[0] * Y_i[1]) / (Y_i.reduce((a, b) => a + b)) * Math.pow(tau[0][1] / (Pi[0] * P[1]), 1 - sigma);
+  const exporter = parseInt(document.getElementById("exporterSelect").value);
+  const importer = parseInt(document.getElementById("importerSelect").value);
+  const Y_w = Y_i.reduce((a, b) => a + b);
+  
+  const exporterRaw = document.getElementById("exporterSelect").value;
+  const importerRaw = document.getElementById("importerSelect").value;
+  
+  const showEquation = exporterRaw !== "none" && importerRaw !== "none";
+  
+  const box = document.getElementById("equationBox");
+  box.style.display = showEquation ? "block" : "none";
+  
+  if (showEquation) {
+    const exporter = parseInt(exporterRaw);
+    const importer = parseInt(importerRaw);
+    const exporterLabel = labels[exporter];
+    const importerLabel = labels[importer];
+  
+    const Y_w = Y_i.reduce((a, b) => a + b);
+    const gravity_val = (Y_i[exporter] * Y_i[importer]) / Y_w *
+                        Math.pow(tau[exporter][importer] / (Pi[exporter] * P[importer]), 1 - sigma);
+  
+    updateEquation(Y_i[exporter], Y_i[importer], Y_w, tau[exporter][importer], Pi[exporter], P[importer], sigma, gravity_val, exporterLabel, importerLabel);
+  }
 
-  updateEquation(Y_i[0], Y_i[1], Y_i.reduce((a, b) => a + b), tau[0][1], Pi[0], P[1], sigma, gravity_val);
   renderTable({ flows, tau }, labels, tableType, Pi, P);
 
   const nodes = labels.map((l, i) => ({
@@ -315,10 +363,11 @@ const tau = Array.from({ length: N }, (_, i) =>
   
   Plotly.react('plot', nodes, layout, config);
 
-  Plotly.newPlot('plot', nodes, layout);
 }
 
 Array.from(document.querySelectorAll("input, select")).forEach(el => el.addEventListener("input", drawPlot));
+document.getElementById("exporterSelect").addEventListener("change", drawPlot);
+document.getElementById("importerSelect").addEventListener("change", drawPlot);
 drawPlot();
 updateSliderValues();
 </script>
